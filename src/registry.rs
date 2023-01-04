@@ -1,10 +1,10 @@
 pub use crate::identifier::Identifier;
-pub struct Registry<T> {
-    keys: Vec<Identifier>,
+pub struct Registry<T, const NAMESPACE: &'static str = "game"> {
+    keys: Vec<Identifier<NAMESPACE>>,
     values: Vec<T>,
 }
 
-impl<T> Registry<T> {
+impl<T, const NAMESPACE: &'static str> Registry<T, NAMESPACE> {
     pub fn new() -> Self {
         Self {
             keys: Vec::new(),
@@ -19,11 +19,11 @@ impl<T> Registry<T> {
         }
     }
 
-    pub fn contains(&self, id: &Identifier) -> bool {
+    pub fn contains(&self, id: &Identifier<NAMESPACE>) -> bool {
         self.keys.contains(&id)
     }
 
-    pub fn get_handle(&self, id: &Identifier) -> Option<RegistryHandle> {
+    pub fn get_handle(&self, id: &Identifier<NAMESPACE>) -> Option<RegistryHandle> {
         for (idx, key) in self.keys.iter().enumerate() {
             if id == key {
                 return Some(RegistryHandle::new(idx));
@@ -36,12 +36,12 @@ impl<T> Registry<T> {
         self.values.get(handle.idx)
     }
 
-    pub fn get_direct(&self, id: &Identifier) -> Option<&T> {
+    pub fn get_direct(&self, id: &Identifier<NAMESPACE>) -> Option<&T> {
         let handle = self.get_handle(&id)?;
         self.get(&handle)
     }
 
-    pub fn insert(&mut self, id: &Identifier, value: T) -> Result<(), RegistryInsertError> {
+    pub fn insert(&mut self, id: &Identifier<NAMESPACE>, value: T) -> Result<(), RegistryInsertError> {
         if !self.contains(&id) {
             self.keys.push(id.clone());
             self.values.push(value);
@@ -57,7 +57,7 @@ impl<T> Registry<T> {
     }
 }
 
-impl<T> Default for Registry<T> {
+impl<T, const NAMESPACE: &'static str> Default for Registry<T, NAMESPACE> {
     fn default() -> Self {
         Self::new()
     }

@@ -1,11 +1,10 @@
 use std::fmt::Display;
 
-const DEFAULT_NAMESPACE: &'static str = "game";
 const DIVIDER: &'static str = ":";
 const DEFAULT_ID: &'static str = "unknown";
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
-pub struct Identifier {
+pub struct Identifier<const DEFAULT_NAMESPACE: &'static str = "game"> {
     scope: String,
     id: String,
 }
@@ -20,7 +19,7 @@ impl Identifier {
     }
 }
 
-impl From<String> for Identifier {
+impl<const DEFAULT_NAMESPACE: &'static str>  From<String> for Identifier<DEFAULT_NAMESPACE> {
     fn from(value: String) -> Self {
         let cleaned = if !value.starts_with(DIVIDER) {
             value
@@ -69,15 +68,17 @@ mod tests {
 
     use std::collections::HashMap;
 
-    use crate::identifier::{DEFAULT_ID, DEFAULT_NAMESPACE};
+    use crate::identifier::DEFAULT_ID;
 
     use super::{Identifier, DIVIDER};
+    
+    const NAMESPACE: &'static str = "namespace";
 
     #[test]
     fn from() {
         let scope = "scope";
         let id = "id";
-        let identifier = Identifier::from(vec![scope, DIVIDER.into(), id].concat());
+        let identifier: Identifier<NAMESPACE> = Identifier::from(vec![scope, DIVIDER.into(), id].concat());
 
         assert_eq!(identifier.scope, scope);
         assert_eq!(identifier.id, id);
@@ -86,25 +87,25 @@ mod tests {
     #[test]
     fn from_no_scope() {
         let id = "id";
-        let identifier = Identifier::from(String::from(id));
+        let identifier: Identifier<NAMESPACE> = Identifier::from(String::from(id));
 
-        assert_eq!(identifier.scope, DEFAULT_NAMESPACE);
+        assert_eq!(identifier.scope, NAMESPACE);
         assert_eq!(identifier.id, id);
     }
 
     #[test]
     fn from_dirty_no_scope() {
         let id = "id";
-        let identifier = Identifier::from(vec![DIVIDER, id].concat());
+        let identifier: Identifier<NAMESPACE> = Identifier::from(vec![DIVIDER, id].concat());
 
-        assert_eq!(identifier.scope, DEFAULT_NAMESPACE);
+        assert_eq!(identifier.scope, NAMESPACE);
         assert_eq!(identifier.id, id);
     }
 
     #[test]
     fn from_no_id() {
         let scope = "scope";
-        let identifier = Identifier::from(vec![scope, DIVIDER].concat());
+        let identifier: Identifier = Identifier::from(vec![scope, DIVIDER].concat());
 
         assert_eq!(identifier.scope, scope);
         assert_eq!(identifier.id, DEFAULT_ID);

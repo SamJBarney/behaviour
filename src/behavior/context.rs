@@ -1,7 +1,8 @@
 use std::marker::Tuple;
 use std::ops::Fn;
 
-use crate::registry::{Identifier, Registry, RegistryHandle, RegistryInsertError};
+use crate::{identifier::Identifier, registry::{Registry, RegistryHandle, RegistryInsertError}, };
+use super::state::TreeResult;
 
 pub trait NodeHandler<Args: Tuple, ReturnType>: Fn<Args, Output = ReturnType> {}
 
@@ -20,7 +21,7 @@ impl<CallType: Tuple, ReturnType> std::fmt::Debug
 }
 
 #[derive(Debug)]
-pub struct BehaviourContext<CallType: Tuple, ReturnType = crate::state::TreeResult> {
+pub struct BehaviourContext<CallType: Tuple, ReturnType = TreeResult> {
     executors: Registry<fn(CallType) -> ReturnType>,
     decorators: Registry<fn(ReturnType, CallType) -> ReturnType>,
 }
@@ -85,7 +86,7 @@ impl<CallType: Tuple, ReturnType> BehaviourContext<CallType, ReturnType> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{identifier::Identifier, state::TreeResult};
+    use crate::{identifier::Identifier, behavior::state::TreeResult};
 
     use super::BehaviourContext;
     type Subject = BehaviourContext<(i32, i32)>;
